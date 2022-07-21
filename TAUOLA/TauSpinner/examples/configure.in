@@ -1,0 +1,87 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT( [Tauola C++ Interface - TauSpinner examples], [1.1], [tomasz.przedzinski@uj.edu.pl] )
+AC_LANG_CPLUSPLUS
+
+AC_PREFIX_DEFAULT([`pwd`])
+AC_CONFIG_SRCDIR([.])
+
+##############################################################################
+# Process command line options
+
+echo ""
+
+AC_MSG_CHECKING([if HepMC location defined])
+AC_ARG_WITH(
+  [hepmc],
+  [AS_HELP_STRING([--with-hepmc], [Path to HepMC 2.xx (use --without-hepmc to compile without HepMC)] )],
+  [AC_MSG_RESULT([$with_hepmc])],
+  [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([if MC-TESTER location defined])
+AC_ARG_WITH(
+  [mc-tester],
+    [AS_HELP_STRING([--with-mc-tester], [Path to MC-TESTER 1.23 or later (used by examples only)] )],
+  [AC_MSG_RESULT([$with_mc_tester])],
+  [AC_MSG_RESULT([no])]
+)
+
+echo ""
+
+##############################################################################
+# Check for programs
+AC_PROG_MAKE_SET
+AC_PROG_LN_S
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
+
+AC_PROG_CPP
+AC_CHECK_PROG(DIRECT_CPP,cpp,cpp,$CPP)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_CHECK_TYPES([ptrdiff_t])
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS([atexit getcwd pow sqrt], ,
+[ echo "" &&
+  echo "ERROR: Basic functions not found. Something's wrong with paths." &&
+  exit -1
+])
+
+##############################################################################
+# Check for HepMC header files
+
+CPPFLAGS="-I$with_hepmc/include $CPPFLAGS"
+
+AC_CHECK_HEADERS([HepMC/Version.h], ,
+[ echo "" &&
+  echo "ERROR: HepMC not found. Examples will not be compiled. To provide location use:" &&
+  echo "         --with-hepmc=/path/to/HepMC" ;
+  echo ""
+  exit -1
+])
+
+##############################################################################
+# Check for MC-TESTER header files
+
+CPPFLAGS="-I$with_mc_tester/include $CPPFLAGS"
+
+AC_CHECK_HEADERS([Generate.h], ,
+[ echo "" &&
+  echo "INFO: MC-TESTER not found. Examples will not be compiled. To provide location use:" &&
+  echo "         --with-mc-tester=/path/to/MC-TESTER" ;
+  echo ""
+])
+
+AC_SUBST(with_hepmc)
+AC_SUBST(with_mc_tester)
+AC_CONFIG_FILES([make.inc])
+AC_OUTPUT
